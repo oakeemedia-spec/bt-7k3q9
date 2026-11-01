@@ -94,7 +94,7 @@ async function scoreboard(league, date) {
 
 async function loadGames() {
   const keys = new Set();
-  for (const b of BETS) for (const l of b.legs || [b]) keys.add(`${l.league}|${l.date}`);
+  for (const b of BETS.filter(current)) for (const l of b.legs || [b]) keys.add(`${l.league}|${l.date}`);
   const games = {};
   await Promise.all([...keys].map(async k => {
     const [league, date] = k.split("|");
@@ -126,9 +126,17 @@ function judge(leg, e) {
   return { state, text, score, clock, live, done };
 }
 
+// Only today's and upcoming bets are shown; earlier days drop off by themselves.
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+}
+const current = b => (b.legs || [b]).some(l => l.date >= today());
+
 function render(games) {
   let risk = 0, won = 0, pendingRisk = 0, liveUp = 0;  // all in units
-  const html = BETS.map(b => {
+  const shown = BETS.filter(current);
+  const html = shown.map(b => {
     const legs = (b.legs || [b]).map(l => ({ l, j: judge(l, games[l.id]) }));
     const planned = b.status === "planned";
     // Overall: a teaser loses if any leg loses, wins only when every leg wins.
@@ -153,7 +161,8 @@ function render(games) {
         <div class="money">Risk ${units(b.units)}<br>To win ${units(b.win)}</div></div>
       ${body}</div>`;
   }).join("");
-  document.getElementById("bets").innerHTML = html;
+  document.getElementById("bets").innerHTML = html ||
+    "<div class='bet'><div class='status pending'>No bets placed for today yet. Send Claude your slips.</div></div>";
   document.getElementById("totals").innerHTML = [
     ["Units risked", units(risk)],
     ["Settled", units(won, true)],
