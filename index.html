@@ -41,6 +41,15 @@
   .tag.planned { border-color: var(--push); color: var(--push); }
   .leg { border-top: 1px dashed var(--line); margin-top: 10px; padding-top: 8px; }
   .err { color: var(--lose); font-size: 13px; margin-top: 6px; }
+  details.chk { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+  details.chk summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  .chk .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .chk label { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
+  .chk input { width: 92px; font-size: 16px; padding: 5px 7px; border-radius: 8px; border: 1px solid var(--line);
+               background: var(--bg); color: var(--text); }
+  .chk .verdict { margin-top: 8px; font-weight: 600; font-size: 14px; }
+  .chk .verdict.ok { color: var(--win); } .chk .verdict.no { color: var(--lose); }
+  .chk .hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
   .calc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 0 0 16px; }
   .calc label { color: var(--muted); font-size: 13px; display: block; margin-bottom: 6px; }
   .calc input { width: 140px; font-size: 16px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line);
@@ -163,9 +172,10 @@ function render(games) {
     return `<div class="bet ${overall}">
       <div class="top"><div class="pick">${title}${tags}</div>
         <div class="money">Risk ${units(b.units)}<br>To win ${units(b.win)}</div></div>
-      ${body}</div>`;
+      ${body}${checkerHtml(b)}</div>`;
   }).join("");
-  document.getElementById("bets").innerHTML = html ||
+  const typing = document.activeElement && document.activeElement.closest && document.activeElement.closest("#bets");
+  if (!typing) document.getElementById("bets").innerHTML = html ||
     "<div class='bet'><div class='status pending'>No bets placed for today yet. Send Claude your slips.</div></div>";
   lastTotals = { risk, won, live: won + liveUp };
   renderCalc();
@@ -177,6 +187,82 @@ function render(games) {
   ].map(([k, v]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
 }
 
+
+// ---- "Still a good bet?" checker: type the line and price you see at the book ----
+const typed = {};  // what's been typed, by bet key, so the 30-second refresh keeps it
+function american(x) {
+  const n = parseFloat(x);
+  if (!isFinite(n)) return null;
+  if (Math.abs(n) >= 100) return n;              // already American, e.g. -125
+  if (n > 1) return n >= 2 ? (n - 1) * 100 : -100 / (n - 1);  // decimal, e.g. 1.92x
+  return null;
+}
+const fmtLine = v => (v > 0 ? "+" : "") + v;
+function fieldsFor(b) {
+  const c = b.check || {}, f = [];
+  const legs = b.legs || [b];
+  legs.forEach((l, i) => {
+    const who = b.legs ? (l.team || "Leg " + (i + 1)) + " " : "";
+    if (l.kind === "under" || l.kind === "over") f.push({ id: "line" + i, label: "Total", leg: l, role: "total" });
+    else {
+      f.push({ id: "line" + i, label: who + "spread", leg: l, role: "spread" });
+      if (c.total_max) f.push({ id: "tot" + i, label: who + "total", leg: l, role: "total" });
+    }
+  });
+  f.push({ id: "price", label: "Price (-125 or 1.92)", role: "price" });
+  return f;
+}
+function verdict(b) {
+  const c = b.check || {}, v = typed[b.key] || {}, bad = [];
+  let checked = 0;
+  for (const f of fieldsFor(b)) {
+    const raw = v[f.id];
+    if (raw === undefined || raw === "") continue;
+    const x = parseFloat(raw);
+    if (!isFinite(x)) continue;
+    checked++;
+    if (f.role === "spread") {
+      if (c.line_min !== undefined && x < c.line_min) bad.push(`${f.label} ${fmtLine(x)} is below ${fmtLine(c.line_min)}`);
+      if (c.line_max !== undefined && x > c.line_max) bad.push(`${f.label} ${fmtLine(x)} is past ${fmtLine(c.line_max)}`);
+    } else if (f.role === "total") {
+      if (c.total_max !== undefined && x > c.total_max) bad.push(`total ${x} is over ${c.total_max}`);
+    } else if (f.role === "price") {
+      const a = american(raw);
+      if (a === null) bad.push("price not understood");
+      else if (c.worst !== undefined && a < c.worst) bad.push(`price ${a > 0 ? "+" : ""}${Math.round(a)} is worse than ${c.worst}`);
+    }
+  }
+  if (!checked) return { cls: "", text: "" };
+  return bad.length ? { cls: "no", text: "Skip: " + bad.join("; ") }
+                    : { cls: "ok", text: "Still a good bet" + (checked < fieldsFor(b).length ? " (on what you entered)" : "") };
+}
+function checkerHtml(b) {
+  if (!b.check) return "";
+  const v = typed[b.key] || {}, d = verdict(b), c = b.check;
+  const inputs = fieldsFor(b).map(f => `<label>${f.label}<input data-key="${b.key}" data-f="${f.id}"
+      inputmode="decimal" value="${v[f.id] ?? ""}"></label>`).join("");
+  const lo = c.line_min, hi = c.line_max;
+  const spreadRule = lo !== undefined && hi !== undefined ? `spread ${fmtLine(lo)} to ${fmtLine(hi)}`
+                   : lo !== undefined ? `spread ${fmtLine(lo)} or more`
+                   : hi !== undefined ? `spread ${fmtLine(hi)} or bigger favorite` : "";
+  const rule = [spreadRule,
+                c.total_max !== undefined ? `total ${c.total_max} or less` : "",
+                c.worst !== undefined ? `price ${c.worst} or better` : ""].filter(Boolean).join(", ");
+  return `<details class="chk"${v.open ? " open" : ""} data-key="${b.key}"><summary>Still a good bet? Check the line</summary>
+    <div class="hint">Needs: ${rule}.${c.note ? " " + c.note + "." : ""}</div>
+    <div class="row">${inputs}</div><div class="verdict ${d.cls}" data-v="${b.key}">${d.text}</div></details>`;
+}
+document.addEventListener("input", e => {
+  const el = e.target;
+  if (!el.dataset || !el.dataset.key) return;
+  (typed[el.dataset.key] ||= {})[el.dataset.f] = el.value;
+  const b = BETS.find(x => x.key === el.dataset.key), out = document.querySelector(`[data-v="${el.dataset.key}"]`);
+  if (b && out) { const d = verdict(b); out.className = "verdict " + d.cls; out.textContent = d.text; }
+});
+document.addEventListener("toggle", e => {
+  const el = e.target;
+  if (el.classList && el.classList.contains("chk")) (typed[el.dataset.key] ||= {}).open = el.open;
+}, true);
 
 // ---- private unit calculator: the dollar amount lives only in this browser ----
 const SEASON_UNITS = 20.2, SEASON_BETS = 109;  // historical average per season (picks.season_history)

@@ -100,6 +100,13 @@
   "units": 0.5,
   "win": 0.4,
   "book": "Hard Rock",
-  "status": "placed"
+  "status": "placed",
+  "check": {
+   "line_min": 1.5,
+   "line_max": 2.5,
+   "total_max": 47,
+   "worst": -130,
+   "note": "Enter each team's normal spread, before the 6 points"
+  }
  }
 ]
