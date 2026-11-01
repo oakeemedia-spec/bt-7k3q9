@@ -97,8 +97,8 @@
     "line": 8.0
    }
   ],
-  "units": 1.0,
-  "win": 0.8,
+  "units": 0.5,
+  "win": 0.4,
   "book": "Hard Rock",
   "status": "placed"
  }
