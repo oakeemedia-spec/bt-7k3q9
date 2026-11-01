@@ -53,32 +53,14 @@
   </header>
   <div class="totals" id="totals"></div>
   <div id="bets"></div>
-  <footer>Scores from ESPN, refreshed every 30 seconds. To add bets, ask Claude or edit the BETS list at the top of the script in this file.</footer>
+  <footer>Scores from ESPN, refreshed every 30 seconds. Bets are added automatically when Check Bets emails them.</footer>
 </div>
 <script>
-// ===== YOUR BETS (edit here) =====
-// Your bets for the live tracker. One entry per bet.
-//   league: "cfb" or "nfl"   date: game day as YYYYMMDD   id: ESPN game id
-//   team:   ESPN abbreviation of the team you bet on      line: your spread (+13.5, -3.5)
-//   units: units risked   win: units won if it hits (profit, not the payout)
-//   Units only, never dollars: this page is public.
-//   status: "placed", or "planned" for a bet you haven't made yet
-// A teaser lists its teams under "legs" with the teased line.
-const BETS = [
-  { league: "cfb", date: "20261031", id: "401856842", team: "TTU", line: -3.5,
-    units: 0.5, win: 0.45, book: "Novig", status: "placed" },
-  { league: "cfb", date: "20261031", id: "401871059", team: "FIU", line: 13.5,
-    units: 1, win: 1.05, book: "Novig", status: "placed" },
-  { league: "cfb", date: "20261031", id: "401856734", team: "UGA", line: -11.5,
-    units: 1, win: 0.97, book: "Novig", status: "placed" },
-  { league: "cfb", date: "20261031", id: "401858284", team: "UVA", line: 13.5,
-    units: 1, win: 0.92, book: "Novig", status: "placed" },
-  { league: "cfb", date: "20261031", id: "401858501", team: "MINN", line: 20.5,
-    units: 0.99, win: 1.05, book: "Novig", status: "placed" },
-  { league: "cfb", date: "20261031", id: "401856843", team: "ASU", line: 16.5,
-    units: 1, win: 1.04, book: "Novig", status: "placed" },
-];
-// ===== end of bets =====
+// Bets live in bets.json, written by Check Bets when it emails (and by Claude).
+// Each: league, date YYYYMMDD, id (ESPN game), team (ESPN abbreviation), kind
+// ("spread" or "under"/"over"), line, units risked, win (units won if it hits),
+// book, status. A teaser has "legs" instead. Units only, never dollars: this page is public.
+let BETS = [];
 
 const PATHS = { cfb: "college-football", nfl: "nfl" };
 const units = (n, signed) => (signed && n > 0 ? "+" : "") + (Math.round(n * 100) / 100) + "u";
@@ -90,6 +72,12 @@ async function scoreboard(league, date) {
   const r = await fetch(url, { cache: "no-store" });
   if (!r.ok) throw new Error(`ESPN ${r.status}`);
   return (await r.json()).events || [];
+}
+
+async function loadBets() {
+  const r = await fetch("bets.json", { cache: "no-store" });
+  if (!r.ok) throw new Error(`bets file ${r.status}`);
+  BETS = await r.json();
 }
 
 async function loadGames() {
@@ -107,9 +95,10 @@ async function loadGames() {
 function judge(leg, e) {
   if (!e) return { state: "pending", text: "Game not found on ESPN", score: "", clock: "" };
   const c = e.competitions[0], st = c.status.type;
-  const mine = c.competitors.find(x => x.team.abbreviation === leg.team);
+  const total = leg.kind === "under" || leg.kind === "over";
+  const mine = total ? null : c.competitors.find(x => x.team.abbreviation === leg.team);
   const opp = c.competitors.find(x => x !== mine);
-  if (!mine) return { state: "pending", text: `Team ${leg.team} not in this game`, score: "", clock: "" };
+  if (!total && !mine) return { state: "pending", text: `Team ${leg.team} not in this game`, score: "", clock: "" };
   const away = c.competitors.find(x => x.homeAway === "away"), home = c.competitors.find(x => x.homeAway === "home");
   const fmt = t => t === mine ? `<b>${t.team.shortDisplayName} ${t.score}</b>` : `${t.team.shortDisplayName} ${t.score}`;
   const score = `${fmt(away)} &nbsp;@&nbsp; ${fmt(home)}`;
@@ -117,7 +106,9 @@ function judge(leg, e) {
   const clock = st.state === "pre" ? new Date(e.date).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })
                                    : st.shortDetail;
   if (st.state === "pre") return { state: "pending", text: "Not started", score, clock, live };
-  const margin = (+mine.score - +opp.score) + leg.line;
+  const points = c.competitors.reduce((n, x) => n + +x.score, 0);
+  const margin = !total ? (+mine.score - +opp.score) + leg.line
+               : leg.kind === "under" ? leg.line - points : points - leg.line;
   const by = Math.abs(margin);
   let state = margin > 0 ? "covering" : margin < 0 ? "losing" : "push";
   let text;
@@ -148,11 +139,12 @@ function render(games) {
       if (allDone) won += overall === "covering" ? b.win : overall === "losing" ? -b.units : 0;
       else { pendingRisk += b.units; if (overall === "covering") liveUp += b.win; if (overall === "losing") liveUp -= b.units; }
     }
-    const title = b.legs ? `Teaser: ${b.legs.map(l => `${l.team} ${signed(l.line)}`).join(" / ")}` : `${b.team} ${signed(b.line)}`;
+    const name = l => l.kind === "under" ? `Under ${l.line}` : l.kind === "over" ? `Over ${l.line}` : `${l.team} ${signed(l.line)}`;
+    const title = b.legs ? `Teaser: ${b.legs.map(name).join(" / ")}` : name(b);
     const tags = `<span class="tag">${b.book}</span>` + (planned ? `<span class="tag planned">not placed${b.note ? ": " + b.note : ""}</span>` : "");
     const body = legs.map(({ l, j }, i) => `
       <div class="${b.legs ? "leg" : ""}">
-        <div class="game"><div class="score">${b.legs ? `<span class="tag" style="margin:0 6px 0 0">${l.team} ${signed(l.line)}</span>` : ""}${j.score}</div>
+        <div class="game"><div class="score">${b.legs ? `<span class="tag" style="margin:0 6px 0 0">${name(l)}</span>` : ""}${j.score}</div>
           <div class="clock ${j.live ? "live" : ""}">${j.live ? "● " : ""}${j.clock}</div></div>
         <div class="status ${j.state}">${j.text}</div>
       </div>`).join("");
@@ -174,6 +166,7 @@ function render(games) {
 async function tick() {
   const el = document.getElementById("updated");
   try {
+    await loadBets();
     render(await loadGames());
     el.textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
   } catch (err) {

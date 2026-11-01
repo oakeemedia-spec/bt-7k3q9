@@ -1,0 +1,105 @@
+[
+ {
+  "key": "cfb-401856842-manual",
+  "league": "cfb",
+  "date": "20261031",
+  "id": "401856842",
+  "team": "TTU",
+  "kind": "spread",
+  "line": -3.5,
+  "units": 0.5,
+  "win": 0.45,
+  "book": "Novig",
+  "status": "placed"
+ },
+ {
+  "key": "cfb-401871059-manual",
+  "league": "cfb",
+  "date": "20261031",
+  "id": "401871059",
+  "team": "FIU",
+  "kind": "spread",
+  "line": 13.5,
+  "units": 1.0,
+  "win": 1.05,
+  "book": "Novig",
+  "status": "placed"
+ },
+ {
+  "key": "cfb-401856734-manual",
+  "league": "cfb",
+  "date": "20261031",
+  "id": "401856734",
+  "team": "UGA",
+  "kind": "spread",
+  "line": -11.5,
+  "units": 1.0,
+  "win": 0.97,
+  "book": "Novig",
+  "status": "placed"
+ },
+ {
+  "key": "cfb-401858284-manual",
+  "league": "cfb",
+  "date": "20261031",
+  "id": "401858284",
+  "team": "UVA",
+  "kind": "spread",
+  "line": 13.5,
+  "units": 1.0,
+  "win": 0.92,
+  "book": "Novig",
+  "status": "placed"
+ },
+ {
+  "key": "cfb-401858501-manual",
+  "league": "cfb",
+  "date": "20261031",
+  "id": "401858501",
+  "team": "MINN",
+  "kind": "spread",
+  "line": 20.5,
+  "units": 0.99,
+  "win": 1.05,
+  "book": "Novig",
+  "status": "placed"
+ },
+ {
+  "key": "cfb-401856843-manual",
+  "league": "cfb",
+  "date": "20261031",
+  "id": "401856843",
+  "team": "ASU",
+  "kind": "spread",
+  "line": 16.5,
+  "units": 1.0,
+  "win": 1.04,
+  "book": "Novig",
+  "status": "placed"
+ },
+ {
+  "key": "teaser-401873025-401873029",
+  "legs": [
+   {
+    "league": "nfl",
+    "date": "20261101",
+    "id": "401873025",
+    "kind": "spread",
+    "team": "ATL",
+    "line": 8.0
+   },
+   {
+    "league": "nfl",
+    "date": "20261101",
+    "id": "401873029",
+    "kind": "spread",
+    "team": "LV",
+    "line": 8.0
+   }
+  ],
+  "units": 1.0,
+  "win": 0.8,
+  "book": "Hard Rock",
+  "status": "placed"
+ }
+]
