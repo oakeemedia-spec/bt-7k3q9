@@ -7,8 +7,8 @@
   "team": "TTU",
   "kind": "spread",
   "line": -3.5,
-  "units": 0.5,
-  "win": 0.45,
+  "units": 1.0,
+  "win": 0.9,
   "book": "Novig",
   "status": "placed"
  },
@@ -59,8 +59,8 @@
   "team": "MINN",
   "kind": "spread",
   "line": 20.5,
-  "units": 0.99,
-  "win": 1.05,
+  "units": 1.0,
+  "win": 1.06,
   "book": "Novig",
   "status": "placed"
  },
@@ -97,8 +97,8 @@
     "line": 8.0
    }
   ],
-  "units": 0.5,
-  "win": 0.4,
+  "units": 1.0,
+  "win": 0.8,
   "book": "Hard Rock",
   "status": "placed",
   "check": {
