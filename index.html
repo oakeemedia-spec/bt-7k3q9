@@ -41,6 +41,12 @@
   .tag.planned { border-color: var(--push); color: var(--push); }
   .leg { border-top: 1px dashed var(--line); margin-top: 10px; padding-top: 8px; }
   .err { color: var(--lose); font-size: 13px; margin-top: 6px; }
+  .calc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 0 0 16px; }
+  .calc label { color: var(--muted); font-size: 13px; display: block; margin-bottom: 6px; }
+  .calc input { width: 140px; font-size: 16px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line);
+                background: var(--bg); color: var(--text); }
+  .calc .out { margin-top: 10px; font-size: 14px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+  .calc .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
   footer { color: var(--muted); font-size: 12px; margin-top: 18px; }
   @media (max-width: 560px) { .totals { grid-template-columns: repeat(2, 1fr); } }
 </style>
@@ -52,6 +58,12 @@
     <span class="updated" id="updated">Loading scores…</span>
   </header>
   <div class="totals" id="totals"></div>
+  <div class="calc">
+    <label for="unit">Your unit size ($). Saved on this phone only, never published.</label>
+    <input id="unit" type="number" inputmode="decimal" min="0" step="50" placeholder="e.g. 2000">
+    <div class="out" id="calcout"></div>
+    <div class="note">Season figure is the historical average of every pick the system sends (about 20 seasons). Future results may be lower.</div>
+  </div>
   <div id="bets"></div>
   <footer>Scores from ESPN, refreshed every 30 seconds. Bets are added automatically when Check Bets emails them.</footer>
 </div>
@@ -155,6 +167,8 @@ function render(games) {
   }).join("");
   document.getElementById("bets").innerHTML = html ||
     "<div class='bet'><div class='status pending'>No bets placed for today yet. Send Claude your slips.</div></div>";
+  lastTotals = { risk, won, live: won + liveUp };
+  renderCalc();
   document.getElementById("totals").innerHTML = [
     ["Units risked", units(risk)],
     ["Settled", units(won, true)],
@@ -162,6 +176,32 @@ function render(games) {
     ["Still riding", units(pendingRisk)],
   ].map(([k, v]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
 }
+
+
+// ---- private unit calculator: the dollar amount lives only in this browser ----
+const SEASON_UNITS = 20.2, SEASON_BETS = 109;  // historical average per season (picks.season_history)
+let lastTotals = { risk: 0, won: 0, live: 0 };
+function unitSize() {
+  try { return parseFloat(localStorage.getItem("unitSize")) || 0; } catch (e) { return 0; }
+}
+function dollars(n) { return (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString(); }
+function renderCalc() {
+  const u = unitSize(), out = document.getElementById("calcout");
+  if (!u) { out.innerHTML = "Enter your unit to see dollars."; return; }
+  const t = lastTotals;
+  out.innerHTML = `Historical season average: <b>${dollars(SEASON_UNITS * u)}</b> on about ${SEASON_BETS} bets<br>`
+    + `Today's bets risk: <b>${dollars(t.risk * u)}</b><br>`
+    + `Settled today: <b>${dollars(t.won * u)}</b> | If it ended now: <b>${dollars(t.live * u)}</b>`;
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const box = document.getElementById("unit");
+  const u = unitSize(); if (u) box.value = u;
+  box.addEventListener("input", () => {
+    try { localStorage.setItem("unitSize", box.value); } catch (e) {}
+    renderCalc();
+  });
+  renderCalc();
+});
 
 async function tick() {
   const el = document.getElementById("updated");
