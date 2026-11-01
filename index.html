@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Bet Tracker</title>
+<style>
+  :root {
+    --bg: #0b0d12; --card: #151922; --line: #252b38; --text: #e8ebf2; --muted: #8b93a7;
+    --win: #2fbf71; --lose: #e5484d; --push: #d6a23a; --live: #ff6b3d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 40px; }
+  header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 22px; margin: 0; }
+  .updated { color: var(--muted); font-size: 13px; }
+  .totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0 20px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .tile .k { color: var(--muted); font-size: 12px; }
+  .tile .v { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bet { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--line);
+         border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .bet.covering { border-left-color: var(--win); }
+  .bet.losing { border-left-color: var(--lose); }
+  .bet.push { border-left-color: var(--push); }
+  .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .pick { font-size: 18px; font-weight: 700; }
+  .money { color: var(--muted); font-size: 13px; text-align: right; white-space: nowrap; }
+  .game { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
+  .score { font-size: 17px; font-variant-numeric: tabular-nums; }
+  .score b { font-size: 20px; }
+  .clock { color: var(--muted); font-size: 13px; text-align: right; }
+  .clock.live { color: var(--live); font-weight: 600; }
+  .status { margin-top: 8px; font-weight: 600; }
+  .status.covering { color: var(--win); } .status.losing { color: var(--lose); } .status.push { color: var(--push); }
+  .status.pending { color: var(--muted); font-weight: 400; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 99px;
+         border: 1px solid var(--line); color: var(--muted); margin-left: 6px; vertical-align: 2px; }
+  .tag.planned { border-color: var(--push); color: var(--push); }
+  .leg { border-top: 1px dashed var(--line); margin-top: 10px; padding-top: 8px; }
+  .err { color: var(--lose); font-size: 13px; margin-top: 6px; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 18px; }
+  @media (max-width: 560px) { .totals { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Live Bet Tracker</h1>
+    <span class="updated" id="updated">Loading scores…</span>
+  </header>
+  <div class="totals" id="totals"></div>
+  <div id="bets"></div>
+  <footer>Scores from ESPN, refreshed every 30 seconds. To add bets, ask Claude or edit the BETS list at the top of the script in this file.</footer>
+</div>
+<script>
+// ===== YOUR BETS (edit here) =====
+// Your bets for the live tracker. One entry per bet.
+//   league: "cfb" or "nfl"   date: game day as YYYYMMDD   id: ESPN game id
+//   team:   ESPN abbreviation of the team you bet on      line: your spread (+13.5, -3.5)
+//   units: units risked   win: units won if it hits (profit, not the payout)
+//   Units only, never dollars: this page is public.
+//   status: "placed", or "planned" for a bet you haven't made yet
+// A teaser lists its teams under "legs" with the teased line.
+const BETS = [
+  { league: "cfb", date: "20261031", id: "401856842", team: "TTU", line: -3.5,
+    units: 0.5, win: 0.45, book: "Novig", status: "placed" },
+  { league: "cfb", date: "20261031", id: "401871059", team: "FIU", line: 13.5,
+    units: 1, win: 1.05, book: "Novig", status: "placed" },
+  { league: "cfb", date: "20261031", id: "401856734", team: "UGA", line: -11.5,
+    units: 1, win: 0.97, book: "Novig", status: "placed" },
+  { league: "cfb", date: "20261031", id: "401858284", team: "UVA", line: 13.5,
+    units: 1, win: 0.92, book: "Novig", status: "placed" },
+  { league: "cfb", date: "20261031", id: "401858501", team: "MINN", line: 20.5,
+    units: 0.99, win: 1.05, book: "Novig", status: "placed" },
+  { league: "cfb", date: "20261031", id: "401856843", team: "ASU", line: 16.5,
+    units: 1, win: 1.04, book: "Novig", status: "placed" },
+];
+// ===== end of bets =====
+
+const PATHS = { cfb: "college-football", nfl: "nfl" };
+const units = (n, signed) => (signed && n > 0 ? "+" : "") + (Math.round(n * 100) / 100) + "u";
+const signed = x => (x > 0 ? "+" : "") + x;
+
+async function scoreboard(league, date) {
+  let url = `https://site.api.espn.com/apis/site/v2/sports/football/${PATHS[league]}/scoreboard?dates=${date}&limit=400`;
+  if (league === "cfb") url += "&groups=80";
+  const r = await fetch(url, { cache: "no-store" });
+  if (!r.ok) throw new Error(`ESPN ${r.status}`);
+  return (await r.json()).events || [];
+}
+
+async function loadGames() {
+  const keys = new Set();
+  for (const b of BETS) for (const l of b.legs || [b]) keys.add(`${l.league}|${l.date}`);
+  const games = {};
+  await Promise.all([...keys].map(async k => {
+    const [league, date] = k.split("|");
+    for (const e of await scoreboard(league, date)) games[e.id] = e;
+  }));
+  return games;
+}
+
+// One leg against its game: score text, clock, and how the bet stands.
+function judge(leg, e) {
+  if (!e) return { state: "pending", text: "Game not found on ESPN", score: "", clock: "" };
+  const c = e.competitions[0], st = c.status.type;
+  const mine = c.competitors.find(x => x.team.abbreviation === leg.team);
+  const opp = c.competitors.find(x => x !== mine);
+  if (!mine) return { state: "pending", text: `Team ${leg.team} not in this game`, score: "", clock: "" };
+  const away = c.competitors.find(x => x.homeAway === "away"), home = c.competitors.find(x => x.homeAway === "home");
+  const fmt = t => t === mine ? `<b>${t.team.shortDisplayName} ${t.score}</b>` : `${t.team.shortDisplayName} ${t.score}`;
+  const score = `${fmt(away)} &nbsp;@&nbsp; ${fmt(home)}`;
+  const live = st.state === "in", done = st.state === "post";
+  const clock = st.state === "pre" ? new Date(e.date).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })
+                                   : st.shortDetail;
+  if (st.state === "pre") return { state: "pending", text: "Not started", score, clock, live };
+  const margin = (+mine.score - +opp.score) + leg.line;
+  const by = Math.abs(margin);
+  let state = margin > 0 ? "covering" : margin < 0 ? "losing" : "push";
+  let text;
+  if (done) text = state === "covering" ? `WON, covered by ${by}` : state === "losing" ? `LOST by ${by}` : "PUSH";
+  else text = state === "covering" ? `Covering by ${by}` : state === "losing" ? `Not covering, need ${by} more` : "Right on the number";
+  return { state, text, score, clock, live, done };
+}
+
+function render(games) {
+  let risk = 0, won = 0, pendingRisk = 0, liveUp = 0;  // all in units
+  const html = BETS.map(b => {
+    const legs = (b.legs || [b]).map(l => ({ l, j: judge(l, games[l.id]) }));
+    const planned = b.status === "planned";
+    // Overall: a teaser loses if any leg loses, wins only when every leg wins.
+    const states = legs.map(x => x.j.state), allDone = legs.every(x => x.j.done);
+    const overall = states.includes("losing") ? "losing" : states.every(s => s === "covering") ? "covering"
+                  : states.includes("pending") ? "pending" : "push";
+    if (!planned) {
+      risk += b.units;
+      if (allDone) won += overall === "covering" ? b.win : overall === "losing" ? -b.units : 0;
+      else { pendingRisk += b.units; if (overall === "covering") liveUp += b.win; if (overall === "losing") liveUp -= b.units; }
+    }
+    const title = b.legs ? `Teaser: ${b.legs.map(l => `${l.team} ${signed(l.line)}`).join(" / ")}` : `${b.team} ${signed(b.line)}`;
+    const tags = `<span class="tag">${b.book}</span>` + (planned ? `<span class="tag planned">not placed${b.note ? ": " + b.note : ""}</span>` : "");
+    const body = legs.map(({ l, j }, i) => `
+      <div class="${b.legs ? "leg" : ""}">
+        <div class="game"><div class="score">${b.legs ? `<span class="tag" style="margin:0 6px 0 0">${l.team} ${signed(l.line)}</span>` : ""}${j.score}</div>
+          <div class="clock ${j.live ? "live" : ""}">${j.live ? "● " : ""}${j.clock}</div></div>
+        <div class="status ${j.state}">${j.text}</div>
+      </div>`).join("");
+    return `<div class="bet ${overall}">
+      <div class="top"><div class="pick">${title}${tags}</div>
+        <div class="money">Risk ${units(b.units)}<br>To win ${units(b.win)}</div></div>
+      ${body}</div>`;
+  }).join("");
+  document.getElementById("bets").innerHTML = html;
+  document.getElementById("totals").innerHTML = [
+    ["Units risked", units(risk)],
+    ["Settled", units(won, true)],
+    ["If it ended now", units(won + liveUp, true)],
+    ["Still riding", units(pendingRisk)],
+  ].map(([k, v]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+}
+
+async function tick() {
+  const el = document.getElementById("updated");
+  try {
+    render(await loadGames());
+    el.textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+  } catch (err) {
+    el.textContent = "Couldn't reach ESPN (" + err.message + "). Retrying…";
+  }
+}
+tick();
+setInterval(tick, 30000);
+</script>
+</body>
+</html>
