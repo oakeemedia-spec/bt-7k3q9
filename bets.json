@@ -108,5 +108,144 @@
    "worst": -130,
    "note": "Enter each team's normal spread, before the 6 points"
   }
+ },
+ {
+  "league": "cfb",
+  "date": "20261107",
+  "id": "401856849",
+  "kind": "spread",
+  "team": "UTAH",
+  "line": -4.5,
+  "units": 1.0,
+  "win": 1.04,
+  "book": "Novig",
+  "key": "cfb-401856849-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261107",
+  "id": "401856740",
+  "kind": "spread",
+  "team": "LSU",
+  "line": -6.5,
+  "units": 1.0,
+  "win": 1.04,
+  "book": "Novig",
+  "key": "cfb-401856740-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261107",
+  "id": "401858514",
+  "kind": "spread",
+  "team": "OSU",
+  "line": -7.5,
+  "units": 1.0,
+  "win": 1.0,
+  "book": "Novig",
+  "key": "cfb-401858514-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261107",
+  "id": "401858517",
+  "kind": "spread",
+  "team": "RUTG",
+  "line": 17.5,
+  "units": 1.0,
+  "win": 1.11,
+  "book": "Novig",
+  "key": "cfb-401858517-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261107",
+  "id": "401856745",
+  "kind": "spread",
+  "team": "TENN",
+  "line": -5.5,
+  "units": 1.0,
+  "win": 0.91,
+  "book": "Best price",
+  "key": "cfb-401856745-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261107",
+  "id": "401871075",
+  "kind": "spread",
+  "team": "SHSU",
+  "line": 16.5,
+  "units": 1.0,
+  "win": 0.91,
+  "book": "Best price",
+  "key": "cfb-401871075-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261107",
+  "id": "401858291",
+  "kind": "spread",
+  "team": "ND",
+  "line": -7.5,
+  "units": 1.0,
+  "win": 1.08,
+  "book": "Novig",
+  "key": "cfb-401858291-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261107",
+  "id": "401858511",
+  "kind": "spread",
+  "team": "MSU",
+  "line": 14.5,
+  "units": 1.0,
+  "win": 0.94,
+  "book": "Novig",
+  "key": "cfb-401858511-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
  }
 ]
