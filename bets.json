@@ -247,5 +247,22 @@
    "total_max": 48,
    "worst": -120
   }
+ },
+ {
+  "league": "cfb",
+  "date": "20261107",
+  "id": "401856849",
+  "kind": "spread",
+  "team": "UTAH",
+  "line": -4.5,
+  "units": 1.0,
+  "win": 1.0,
+  "book": "Novig",
+  "key": "cfb-401856849-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
  }
 ]
