@@ -58,7 +58,8 @@
   .calc .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
   footer { color: var(--muted); font-size: 12px; margin-top: 18px; }
   @media (max-width: 560px) { .totals { grid-template-columns: repeat(2, 1fr); } }
-  .nvline { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .nvline { font-size: 14px; margin-top: 6px; }
+  .nvline .src { color: var(--muted); font-size: 12px; }
 </style>
 </head>
 <body>
@@ -151,7 +152,7 @@ function novigLine(leg, e) {
     if (!sp && !ml) return "";
     side = (sp ? `${leg.team} ${sp.displayLabel} at ${px(sp)}` : leg.team) + (ml ? ` | to win ${px(ml)}` : "");
   }
-  return `<div class="nvline">${isLive ? "Live" : "Now"} on Novig: ${side}</div>`;
+  return `<div class="nvline"><b>Current line${isLive ? " (live)" : ""}:</b> ${side} <span class="src">Novig</span></div>`;
 }
 
 async function loadGames() {
