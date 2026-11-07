@@ -58,6 +58,7 @@
   .calc .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
   footer { color: var(--muted); font-size: 12px; margin-top: 18px; }
   @media (max-width: 560px) { .totals { grid-template-columns: repeat(2, 1fr); } }
+  .nvline { color: var(--muted); font-size: 13px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -74,7 +75,7 @@
     <div class="note">Season figure is the historical average of every pick the system sends (about 20 seasons). Future results may be lower.</div>
   </div>
   <div id="bets"></div>
-  <footer>Scores from ESPN, refreshed every 30 seconds. Bets are added automatically when Check Bets emails them.</footer>
+  <footer>Scores from ESPN, live lines from Novig, refreshed every 30 seconds. Bets are added automatically when Check Bets emails them.</footer>
 </div>
 <script>
 // Bets live in bets.json, written by Check Bets when it emails (and by Claude).
@@ -99,6 +100,58 @@ async function loadBets() {
   const r = await fetch("bets.json", { cache: "no-store" });
   if (!r.ok) throw new Error(`bets file ${r.status}`);
   BETS = await r.json();
+}
+
+// ---- Live line from Novig's public feed (no login; it allows web pages to read it) ----
+// Novig quotes the price to take each side as a cost per 1u payout (0.52 = 1.92x).
+let NOVIG = [];
+const NV_LEAGUES = { cfb: "NCAAF", nfl: "NFL" };
+const norm = s => (s || "").toLowerCase().replace(/state/g, "st").replace(/[^a-z0-9]/g, "");
+async function loadNovig(leagues) {
+  const cards = [];
+  await Promise.all([...leagues].map(async lg => {
+    try {
+      const r = await fetch(`https://api.novig.us/nbx/v1/trading/${NV_LEAGUES[lg]}/page?displayUnseededMarkets=false`, { cache: "no-store" });
+      if (!r.ok) return;
+      for (const sec of (await r.json()).sections || []) {
+        if (sec.title !== "Games") continue;
+        const subs = (sec.content.subSections || []).slice(0, 1);
+        for (const sub of subs.length ? subs : [sec.content])
+          for (const g of sub.components || []) if (g.type === "game_event_card") cards.push(g);
+      }
+    } catch (e) { /* no Novig line this time; scores still show */ }
+  }));
+  NOVIG = cards;
+}
+// Same team: the mascot must match exactly (Spartans vs Wolverines), and the school name too.
+function sameTeam(nv, espnTeam) {
+  if (norm(nv.mascot) !== norm(espnTeam.name)) return false;
+  const a = norm(nv.name), b = norm(espnTeam.location);
+  return a === b || norm(nv.shortName) === norm(espnTeam.abbreviation) || (Math.min(a.length, b.length) >= 4 && (a.includes(b) || b.includes(a)));
+}
+function novigLine(leg, e) {
+  if (!e || !NOVIG.length) return "";
+  const c = e.competitions[0];
+  if (c.status.type.state === "post") return "";
+  const away = c.competitors.find(x => x.homeAway === "away"), home = c.competitors.find(x => x.homeAway === "home");
+  const g = NOVIG.find(g => sameTeam(g.awayTeam, away.team) && sameTeam(g.homeTeam, home.team));
+  if (!g) return "";
+  const cols = {};
+  for (const col of g.columns || []) cols[col.title] = col.outcomes || [];
+  const px = o => { const p = parseFloat(o && o.available); return p > 0.05 && p < 0.95 ? (1 / p).toFixed(2) + "x" : "no price"; };
+  const isLive = c.status.type.state === "in";
+  let side;
+  if (leg.kind === "under" || leg.kind === "over") {
+    const o = (cols.Total || [])[leg.kind === "under" ? 1 : 0];
+    if (!o) return "";
+    side = `${leg.kind === "under" ? "Under" : "Over"} ${(o.displayLabel || "").replace(/^[OU]\s*/, "")} at ${px(o)}`;
+  } else {
+    const i = leg.team === home.team.abbreviation ? 1 : 0;
+    const sp = (cols.Spread || [])[i], ml = (cols.Winner || [])[i];
+    if (!sp && !ml) return "";
+    side = (sp ? `${leg.team} ${sp.displayLabel} at ${px(sp)}` : leg.team) + (ml ? ` | to win ${px(ml)}` : "");
+  }
+  return `<div class="nvline">${isLive ? "Live" : "Now"} on Novig: ${side}</div>`;
 }
 
 async function loadGames() {
@@ -167,7 +220,7 @@ function render(games) {
       <div class="${b.legs ? "leg" : ""}">
         <div class="game"><div class="score">${b.legs ? `<span class="tag" style="margin:0 6px 0 0">${name(l)}</span>` : ""}${j.score}</div>
           <div class="clock ${j.live ? "live" : ""}">${j.live ? "● " : ""}${j.clock}</div></div>
-        <div class="status ${j.state}">${j.text}</div>
+        <div class="status ${j.state}">${j.text}</div>${novigLine(l, games[l.id])}
       </div>`).join("");
     return `<div class="bet ${overall}">
       <div class="top"><div class="pick">${title}${tags}</div>
@@ -293,7 +346,10 @@ async function tick() {
   const el = document.getElementById("updated");
   try {
     await loadBets();
-    render(await loadGames());
+    const leagues = new Set();
+    for (const b of BETS.filter(current)) for (const l of b.legs || [b]) if (NV_LEAGUES[l.league]) leagues.add(l.league);
+    const [games] = await Promise.all([loadGames(), loadNovig(leagues)]);
+    render(games);
     el.textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
   } catch (err) {
     el.textContent = "Couldn't reach ESPN (" + err.message + "). Retrying…";
