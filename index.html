@@ -58,7 +58,10 @@
   .calc .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
   footer { color: var(--muted); font-size: 12px; margin-top: 18px; }
   @media (max-width: 560px) { .totals { grid-template-columns: repeat(2, 1fr); } }
-  .nvline { font-size: 14px; margin-top: 6px; }
+  .nvline { margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: rgba(255, 196, 0, 0.12);
+            border: 1px solid rgba(255, 196, 0, 0.45); font-size: 15px; }
+  .nvline .lbl { display: block; color: #ffc400; font-weight: 800; font-size: 13px; letter-spacing: 0.06em; margin-bottom: 2px; }
+  .nvline .val { font-weight: 700; }
   .nvline .src { color: var(--muted); font-size: 12px; }
 </style>
 </head>
@@ -152,7 +155,7 @@ function novigLine(leg, e) {
     if (!sp && !ml) return "";
     side = (sp ? `${leg.team} ${sp.displayLabel} at ${px(sp)}` : leg.team) + (ml ? ` | to win ${px(ml)}` : "");
   }
-  return `<div class="nvline"><b>Current line${isLive ? " (live)" : ""}:</b> ${side} <span class="src">Novig</span></div>`;
+  return `<div class="nvline"><span class="lbl">CURRENT LINE${isLive ? " · LIVE" : ""}</span><span class="val">${side}</span> <span class="src">Novig</span></div>`;
 }
 
 async function loadGames() {
