@@ -247,5 +247,235 @@
    "total_max": 48,
    "worst": -120
   }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401858522",
+  "kind": "spread",
+  "team": "NU",
+  "line": 13.5,
+  "units": 1.0,
+  "win": 1.08,
+  "book": "Novig",
+  "key": "cfb-401858522-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401858297",
+  "kind": "spread",
+  "team": "GT",
+  "line": 14.5,
+  "units": 1.0,
+  "win": 1.0,
+  "book": "Novig",
+  "key": "cfb-401858297-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401856862",
+  "kind": "spread",
+  "team": "KSU",
+  "line": 11.5,
+  "units": 1.0,
+  "win": 1.04,
+  "book": "Novig",
+  "key": "cfb-401856862-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401856883",
+  "kind": "spread",
+  "team": "MIZ",
+  "line": 15.5,
+  "units": 1.0,
+  "win": 1.06,
+  "book": "Novig",
+  "key": "cfb-401856883-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401856883",
+  "kind": "spread",
+  "team": "UGA",
+  "line": -15.5,
+  "units": 1.0,
+  "win": 0.9,
+  "book": "Novig",
+  "key": "cfb-401856883-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401858518",
+  "kind": "spread",
+  "team": "IU",
+  "line": -9.5,
+  "units": 1.0,
+  "win": 0.98,
+  "book": "Novig",
+  "key": "cfb-401858518-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401858523",
+  "kind": "spread",
+  "team": "MICH",
+  "line": 10.5,
+  "units": 1.0,
+  "win": 0.96,
+  "book": "Novig",
+  "key": "cfb-401858523-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401858295",
+  "kind": "spread",
+  "team": "CAL",
+  "line": 10.5,
+  "units": 1.0,
+  "win": 0.98,
+  "book": "Novig",
+  "key": "cfb-401858295-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401864538",
+  "kind": "spread",
+  "team": "SJSU",
+  "line": 12.5,
+  "units": 1.0,
+  "win": 0.96,
+  "book": "Novig",
+  "key": "cfb-401864538-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401856885",
+  "kind": "spread",
+  "team": "LSU",
+  "line": -3.5,
+  "units": 1.0,
+  "win": 0.87,
+  "book": "Novig",
+  "key": "cfb-401856885-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401858519",
+  "kind": "spread",
+  "team": "PUR",
+  "line": 17.5,
+  "units": 1.0,
+  "win": 0.98,
+  "book": "Novig",
+  "key": "cfb-401858519-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401864539",
+  "kind": "spread",
+  "team": "UNLV",
+  "line": 14.5,
+  "units": 1.0,
+  "win": 1.0,
+  "book": "Novig",
+  "key": "cfb-401864539-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401856863",
+  "kind": "spread",
+  "team": "OKST",
+  "line": -3.5,
+  "units": 1.0,
+  "win": 1.06,
+  "book": "Novig",
+  "key": "cfb-401856863-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
  }
 ]
