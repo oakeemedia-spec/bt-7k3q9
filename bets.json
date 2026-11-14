@@ -477,5 +477,23 @@
    "line_max": -3,
    "worst": -120
   }
+ },
+ {
+  "league": "cfb",
+  "date": "20261114",
+  "id": "401858524",
+  "kind": "spread",
+  "team": "MINN",
+  "line": 10.5,
+  "units": 1.0,
+  "win": 1.06,
+  "book": "Novig",
+  "key": "cfb-401858524-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
  }
 ]
