@@ -313,12 +313,13 @@
   "win": 1.06,
   "book": "Novig",
   "key": "cfb-401856883-CFB road dog, low total",
-  "status": "placed",
+  "status": "void",
   "check": {
    "line_min": 10,
    "total_max": 48,
    "worst": -120
-  }
+  },
+  "note": "RULE CONFLICT: both sides were emailed, so neither is a bet (0 units)"
  },
  {
   "league": "cfb",
@@ -331,11 +332,12 @@
   "win": 0.9,
   "book": "Novig",
   "key": "cfb-401856883-CFB Ranked Matchup",
-  "status": "placed",
+  "status": "void",
   "check": {
    "line_max": -3,
    "worst": -120
-  }
+  },
+  "note": "RULE CONFLICT: both sides were emailed, so neither is a bet (0 units)"
  },
  {
   "league": "cfb",

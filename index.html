@@ -207,7 +207,8 @@ function render(games) {
   const shown = BETS.filter(current);
   const html = shown.map(b => {
     const legs = (b.legs || [b]).map(l => ({ l, j: judge(l, games[l.id]) }));
-    const planned = b.status === "planned";
+    const voided = b.status === "void";  // rule conflict (11/14/2026): emailed, then cancelled, 0 units
+    const planned = b.status === "planned" || voided;
     // Overall: a teaser loses if any leg loses, wins only when every leg wins.
     const states = legs.map(x => x.j.state), allDone = legs.every(x => x.j.done);
     const overall = states.includes("losing") ? "losing" : states.every(s => s === "covering") ? "covering"
@@ -219,7 +220,8 @@ function render(games) {
     }
     const name = l => l.kind === "under" ? `Under ${l.line}` : l.kind === "over" ? `Over ${l.line}` : `${l.team} ${signed(l.line)}`;
     const title = b.legs ? `Teaser: ${b.legs.map(name).join(" / ")}` : name(b);
-    const tags = `<span class="tag">${b.book}</span>` + (planned ? `<span class="tag planned">not placed${b.note ? ": " + b.note : ""}</span>` : "");
+    const tags = `<span class="tag">${b.book}</span>` + (voided ? `<span class="tag planned">${b.note || "cancelled, not a bet"}</span>`
+               : planned ? `<span class="tag planned">not placed${b.note ? ": " + b.note : ""}</span>` : "");
     const body = legs.map(({ l, j }, i) => `
       <div class="${b.legs ? "leg" : ""}">
         <div class="game"><div class="score">${b.legs ? `<span class="tag" style="margin:0 6px 0 0">${name(l)}</span>` : ""}${j.score}</div>
@@ -228,7 +230,7 @@ function render(games) {
       </div>`).join("");
     return `<div class="bet ${overall}">
       <div class="top"><div class="pick">${title}${tags}</div>
-        <div class="money">Risk ${units(b.units)}<br>To win ${units(b.win)}</div></div>
+        <div class="money">${voided ? "0 units" : `Risk ${units(b.units)}<br>To win ${units(b.win)}`}</div></div>
       ${body}${checkerHtml(b)}</div>`;
   }).join("");
   const typing = document.activeElement && document.activeElement.closest && document.activeElement.closest("#bets");
