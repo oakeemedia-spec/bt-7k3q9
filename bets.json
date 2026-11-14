@@ -307,25 +307,6 @@
   "date": "20261114",
   "id": "401856883",
   "kind": "spread",
-  "team": "MIZ",
-  "line": 15.5,
-  "units": 1.0,
-  "win": 1.06,
-  "book": "Novig",
-  "key": "cfb-401856883-CFB road dog, low total",
-  "status": "void",
-  "check": {
-   "line_min": 10,
-   "total_max": 48,
-   "worst": -120
-  },
-  "note": "RULE CONFLICT: both sides were emailed, so neither is a bet (0 units)"
- },
- {
-  "league": "cfb",
-  "date": "20261114",
-  "id": "401856883",
-  "kind": "spread",
   "team": "UGA",
   "line": -15.5,
   "units": 1.0,
