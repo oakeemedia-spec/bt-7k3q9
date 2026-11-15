@@ -477,5 +477,21 @@
    "total_max": 48,
    "worst": -120
   }
+ },
+ {
+  "league": "nfl",
+  "date": "20261115",
+  "id": "401873056",
+  "kind": "under",
+  "line": 41.5,
+  "units": 1.5,
+  "win": 1.3,
+  "book": "Novig",
+  "key": "nfl-401873056-NFL windy under",
+  "status": "placed",
+  "check": {
+   "worst": -120,
+   "note": "Wind forecast must still be 10 to 15 mph"
+  }
  }
 ]
