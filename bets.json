@@ -583,5 +583,37 @@
    "total_max": 48,
    "worst": -120
   }
+ },
+ {
+  "league": "nfl",
+  "date": "20261122",
+  "id": "401873071",
+  "kind": "under",
+  "line": 47.5,
+  "units": 1.5,
+  "win": 1.53,
+  "book": "Novig",
+  "key": "nfl-401873071-NFL windy under",
+  "status": "placed",
+  "check": {
+   "worst": -120,
+   "note": "Wind forecast must still be 10 to 15 mph"
+  }
+ },
+ {
+  "league": "nfl",
+  "date": "20261122",
+  "id": "401873067",
+  "kind": "under",
+  "line": 40.5,
+  "units": 1.5,
+  "win": 1.41,
+  "book": "Novig",
+  "key": "nfl-401873067-NFL windy under",
+  "status": "placed",
+  "check": {
+   "worst": -120,
+   "note": "Wind forecast must still be 10 to 15 mph"
+  }
  }
 ]
