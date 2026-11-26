@@ -615,5 +615,23 @@
    "worst": -120,
    "note": "Wind forecast must still be 10 to 15 mph"
   }
+ },
+ {
+  "league": "cfb",
+  "date": "20261126",
+  "id": "401856879",
+  "kind": "spread",
+  "team": "TCU",
+  "line": 13.5,
+  "units": 1.0,
+  "win": 1.08,
+  "book": "Novig",
+  "key": "cfb-401856879-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
  }
 ]
