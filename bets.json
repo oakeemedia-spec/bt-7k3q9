@@ -633,5 +633,58 @@
    "total_max": 48,
    "worst": -120
   }
+ },
+ {
+  "league": "cfb",
+  "date": "20261128",
+  "id": "401858540",
+  "kind": "spread",
+  "team": "MICH",
+  "line": 10.5,
+  "units": 1.0,
+  "win": 0.94,
+  "book": "Novig",
+  "key": "cfb-401858540-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261128",
+  "id": "401871082",
+  "kind": "spread",
+  "team": "SHSU",
+  "line": 11.5,
+  "units": 1.0,
+  "win": 0.96,
+  "book": "Novig",
+  "key": "cfb-401871082-CFB road dog, low total",
+  "status": "placed",
+  "check": {
+   "line_min": 10,
+   "total_max": 48,
+   "worst": -120
+  }
+ },
+ {
+  "league": "cfb",
+  "date": "20261128",
+  "id": "401858541",
+  "kind": "spread",
+  "team": "ORE",
+  "line": -14.5,
+  "units": 1.0,
+  "win": 1.17,
+  "book": "Novig",
+  "key": "cfb-401858541-CFB Ranked Matchup",
+  "status": "placed",
+  "check": {
+   "line_max": -3,
+   "worst": -120
+  }
  }
 ]
